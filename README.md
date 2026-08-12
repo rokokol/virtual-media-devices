@@ -36,6 +36,9 @@ Came over from my rice, **[rokokol/huix](https://github.com/rokokol/huix)**
 - [Without Nix](#without-nix)
 - [Options](#options)
 - [Picking the device in an app](#picking-the-device-in-an-app)
+- [Tests](#tests)
+- [Layout](#layout)
+- [License](#license)
 
 ## The two commands
 
@@ -145,3 +148,27 @@ The two settings reach the command as `VIRTUAL_CAM_LABEL` and `VIRTUAL_CAM_DEVIC
 - **Zoom, Discord, Telegram** — the usual device dropdown in the call settings
 - **Check it yourself**: `ffplay /dev/video10` for the camera, `pavucontrol` → Recording for the microphone
 - A running app usually does not notice a device that appeared after it started — start the command first, then open the app
+
+## Tests
+
+```sh
+tests/run.sh              # 20 checks, no kernel module and no sound server
+```
+
+ffmpeg, pactl, v4l2-ctl and file are all stubbed, so what the suite checks is the command line each script builds — that command line *is* the product. The four camera cases are compared against golden files byte for byte: the filter chain ends in `setpts=N/(fps*TB)`, which is the one thing keeping the picture from stuttering at the loop point, and it should not change by accident. The device is an ordinary file in a scratch dir and `TMPDIR` points there too, so the FIFO the microphone creates cannot land in `/tmp`
+
+`nix flake check` runs that suite plus the packaged wrappers reaching their tools from a bare `PATH`, both settings arriving in the wrapper (and an unset one *not* being baked in), and both modules evaluated against option stubs — including that the microphone half never touches the kernel and that everything can be turned back off
+
+## Layout
+
+```
+virtual-cam.sh       the camera
+virtual-mic.sh       the microphone
+nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix, module-test.nix
+tests/               run.sh, the four stubs and the golden command lines
+install.sh           for systems without Nix
+```
+
+## License
+
+MIT
