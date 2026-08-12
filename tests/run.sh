@@ -203,11 +203,28 @@ else
 fi
 
 world mic-name-reaches-description
-"$MIC" --name "Fake Mic" "$src" >/dev/null
-if grep -qF 'device.description=Fake Mic' "$PACTL_LOG"; then
+"$MIC" --name FakeMic "$src" >/dev/null
+if grep -qF 'device.description=\"FakeMic\"' "$PACTL_LOG"; then
   ok
 else
   fail "--name never reached the description"
+fi
+
+# A space in the name used to be silently cut at the space by the module-argument parser:
+# the description has to arrive quoted at both levels or "Fake Mic" shows up as "Fake"
+world mic-name-survives-a-space
+"$MIC" --name "Fake Mic" "$src" >/dev/null
+if grep -qF 'source_properties="device.description=\"Fake Mic\""' "$PACTL_LOG"; then
+  ok
+else
+  fail "a name with a space was not quoted for both parsers: $(grep '^load-module' "$PACTL_LOG")"
+fi
+
+world mic-name-rejects-a-quote
+if "$MIC" --name 'Fa"ke' "$src" >/dev/null 2>&1; then
+  fail "a name with a double quote was accepted"
+else
+  ok
 fi
 
 world mic-feeds-the-fifo

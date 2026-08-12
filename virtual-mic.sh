@@ -49,6 +49,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# A double quote would close the quoting the description is passed with, and there is no
+# second level of escaping to hide it behind
+if [[ "$name" == *'"'* ]]; then
+  echo "virtual-mic: the name cannot contain a double quote" >&2
+  exit 1
+fi
+
 file="${1:-}"
 if [[ -z "$file" ]]; then
   echo "virtual-mic: no file given" >&2
@@ -85,11 +92,13 @@ trap 'exit 130' INT TERM HUP
 fifo="$(mktemp -u --tmpdir virtual-mic.XXXXXX.fifo)"
 mkfifo "$fifo"
 
+# Quoted twice on purpose: the outer pair survives the module-argument parser, the inner
+# one the property-list parser. With either missing, a name with a space is cut at it
 module_id="$(pactl load-module module-pipe-source \
   source_name="$source_name" \
   file="$fifo" \
   format=s16le rate="$rate" channels="$channels" \
-  source_properties="device.description=$name")"
+  source_properties='"device.description=\"'"$name"'\""')"
 
 echo "virtual-mic: $file → microphone \"$name\" (silence in the headphones, no output created)"
 echo "virtual-mic: select the microphone \"$name\" in the app (Ctrl+C — stop)"
