@@ -91,6 +91,15 @@ in
       # naming one the host has not declared fails the whole config on an assertion that
       # never mentions this module
       users.groups.video.members = cam.users;
+
+      # A warning rather than an assertion: a name missing from users.users is usually a
+      # typo, which would otherwise fail silently — the membership lands in /etc/group and
+      # grants nobody anything — but it is also how a user managed outside NixOS
+      # (mutableUsers, LDAP) legitimately looks, and refusing that would be wrong
+      warnings = map (
+        user:
+        "services.virtual-media-devices.camera.users names \"${user}\", who is not declared in users.users — the video group membership will have no effect unless that user exists outside the configuration"
+      ) (lib.filter (user: !(config.users.users ? ${user})) cam.users);
     })
 
     (lib.mkIf cfg.microphone.enable {

@@ -59,10 +59,12 @@ let
 in
 {
   undeclaredBroken = broken undeclared;
+  undeclaredWarnings = undeclared.warnings;
   undeclaredMembers = undeclared.users.groups.video.members;
   undeclaredModprobe = undeclared.boot.extraModprobeConfig;
 
   declaredBroken = broken declared;
+  declaredWarnings = declared.warnings;
   declaredMembers = declared.users.groups.video.members;
 
   # The group exists in stock nixpkgs with a fixed gid; the module must join it rather than
@@ -70,6 +72,7 @@ in
   videoGid = undeclared.users.groups.video.gid;
   stockVideoGid = off.users.groups.video.gid;
 
+  offWarnings = off.warnings;
   offMembers = off.users.groups.video.members;
   offKernelModules = lib.elem "v4l2loopback" off.boot.kernelModules;
 }

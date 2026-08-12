@@ -135,7 +135,7 @@ Both modules also take a `package`, so you can override or replace what gets ins
 | `camera.enable` | `false` | NixOS: loads the kernel module and installs the command. HM: installs the command only |
 | `camera.label` | `"Virtual Camera"` | NixOS only. The name apps show, and what `virtual-cam` finds the device by |
 | `camera.videoNr` | `10` | NixOS only. Which `/dev/videoN` the loopback takes. Pick a number above your real cameras |
-| `camera.users` | `[ ]` | NixOS only. Users to put in the `video` group, for sessions `uaccess` never covers |
+| `camera.users` | `[ ]` | NixOS only. Users to join the `video` group, for sessions `uaccess` never covers. A name absent from `users.users` gets a warning, not an error — it is usually a typo, but it is also how a user managed outside NixOS looks |
 | `microphone.enable` | `false` | Installs the command |
 
 There is deliberately nothing here for frame rate, mic name, sample rate or the number of loopback devices. An option exists to keep two places from disagreeing — the label and the device number are declared for `modprobe` *and* for the command, and that is the whole reason they are options. Anything that only shapes one run is a flag, and anything that only matters once is a decision the module makes: one loopback, `exclusive_caps=1`, 48000 Hz stereo. If you want a different v4l2loopback layout, load the kernel module yourself and use the package alone

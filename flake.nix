@@ -198,14 +198,21 @@
                 # that never mentions this module
                 want '.undeclaredBroken == []' "a user declared nowhere breaks the system"
                 want '.undeclaredMembers == ["ghost"]' "the named user did not reach the group"
+
+                # …and since that membership grants nobody anything, it has to say so: a typo
+                # in the name is otherwise completely silent
+                want '.undeclaredWarnings | length == 1' "an undeclared user passed without a warning"
+                want '.undeclaredWarnings[0] | test("ghost")' "the warning does not name the user"
                 want '.undeclaredModprobe | test("v4l2loopback")' "the camera did not configure the module"
 
                 want '.declaredBroken == []' "a declared user breaks the system"
                 want '.declaredMembers == ["ghost"]' "a declared user did not reach the group"
+                want '.declaredWarnings == []' "a declared user was warned about anyway"
 
                 # video is a stock group with a fixed gid — join it, do not shadow it
                 want '.videoGid == .stockVideoGid' "the module shadowed the stock video group"
 
+                want '.offWarnings == []' "a warning survives disabling"
                 want '.offMembers == []' "a group member survives disabling"
                 want '.offKernelModules == false' "v4l2loopback loads while disabled"
                 touch $out

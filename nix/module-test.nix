@@ -39,6 +39,14 @@ let
           type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
           default = { };
         };
+        users.users = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+        };
+        warnings = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+        };
       };
     };
 
