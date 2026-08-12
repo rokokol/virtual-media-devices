@@ -86,10 +86,11 @@ in
       ];
 
       # Declared here rather than left to the host config: the module has to carry what it
-      # depends on, even where the host happens to grant it anyway
-      users.users = lib.genAttrs cam.users (_: {
-        extraGroups = [ "video" ];
-      });
+      # depends on, even where the host happens to grant it anyway. Written as group
+      # membership, not as users.users.<name>.extraGroups — the latter *defines* a user, so
+      # naming one the host has not declared fails the whole config on an assertion that
+      # never mentions this module
+      users.groups.video.members = cam.users;
     })
 
     (lib.mkIf cfg.microphone.enable {

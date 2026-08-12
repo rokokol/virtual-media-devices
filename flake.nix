@@ -153,8 +153,8 @@
                 want '.tunedPackage != .package' "the settings never reached the package"
 
                 # The group is the module's own declaration, not something borrowed from the host
-                want '.groups == {}' "a group was handed out to nobody"
-                want '.tunedGroups == ["video"]' "a named user did not get the video group"
+                want '.groups == []' "a group was handed out to nobody"
+                want '.tunedGroups == ["alice"]' "a named user did not reach the video group"
 
                 # The microphone half must not drag the kernel in
                 want '.micPackage | test("virtual-mic")' "no microphone installed"
@@ -170,6 +170,44 @@
                 want '.hmPackages | test("virtual-cam")' "the HM module installs no camera"
                 want '.hmPackages | test("virtual-mic")' "the HM module installs no microphone"
                 want '.hmOffPackages == []' "the HM module installs while disabled"
+                touch $out
+              '';
+
+          # The stub test above cannot see this: a stubbed option accepts anything, so a
+          # module that writes to the wrong one still passes it. Here the real module set
+          # gets to refuse
+          nixos-eval =
+            let
+              real = import ./nix/nixos-eval.nix {
+                inherit lib nixpkgs;
+                system = pkgs.stdenv.hostPlatform.system;
+                module = self.nixosModules.default;
+              };
+            in
+            pkgs.runCommand "nixos-eval"
+              {
+                nativeBuildInputs = [ pkgs.jq ];
+                dump = builtins.toJSON real;
+                passAsFile = [ "dump" ];
+              }
+              ''
+                want() { jq -e "$1" "$dumpPath" >/dev/null || { echo "nixos eval: $2"; exit 1; }; }
+
+                # Naming a user the host never declared used to fail the whole system on
+                # "Exactly one of isSystemUser and isNormalUser must be set" — an assertion
+                # that never mentions this module
+                want '.undeclaredBroken == []' "a user declared nowhere breaks the system"
+                want '.undeclaredMembers == ["ghost"]' "the named user did not reach the group"
+                want '.undeclaredModprobe | test("v4l2loopback")' "the camera did not configure the module"
+
+                want '.declaredBroken == []' "a declared user breaks the system"
+                want '.declaredMembers == ["ghost"]' "a declared user did not reach the group"
+
+                # video is a stock group with a fixed gid — join it, do not shadow it
+                want '.videoGid == .stockVideoGid' "the module shadowed the stock video group"
+
+                want '.offMembers == []' "a group member survives disabling"
+                want '.offKernelModules == false' "v4l2loopback loads while disabled"
                 touch $out
               '';
 

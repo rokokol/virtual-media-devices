@@ -35,7 +35,7 @@ let
           type = lib.types.listOf lib.types.package;
           default = [ ];
         };
-        users.users = lib.mkOption {
+        users.groups = lib.mkOption {
           type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
           default = { };
         };
@@ -95,11 +95,11 @@ in
   package = names wiredUp.environment.systemPackages;
   kernelModules = wiredUp.boot.kernelModules;
   modprobe = wiredUp.boot.extraModprobeConfig;
-  groups = wiredUp.users.users;
+  groups = wiredUp.users.groups.video.members or [ ];
 
   tunedModprobe = tuned.boot.extraModprobeConfig;
   tunedPackage = toString tuned.services.virtual-media-devices.camera.package;
-  tunedGroups = tuned.users.users.alice.extraGroups or [ ];
+  tunedGroups = tuned.users.groups.video.members or [ ];
 
   # The microphone half has to stay clear of the kernel: enabling it alone must not load
   # a module or write a modprobe line
@@ -110,7 +110,7 @@ in
   offPackages = off.environment.systemPackages;
   offKernelModules = off.boot.kernelModules;
   offModprobe = off.boot.extraModprobeConfig;
-  offGroups = off.users.users;
+  offGroups = off.users.groups;
 
   hmPackages = names hmBoth.home.packages;
   hmOffPackages = hmOff.home.packages;
