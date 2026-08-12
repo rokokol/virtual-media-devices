@@ -157,12 +157,14 @@ ffmpeg, pactl, v4l2-ctl and file are all stubbed, so what the suite checks is th
 
 `nix flake check` runs that suite plus the packaged wrappers reaching their tools from a bare `PATH`, both settings arriving in the wrapper (and an unset one *not* being baked in), and both modules evaluated against option stubs — including that the microphone half never touches the kernel and that everything can be turned back off
 
+A stubbed option takes anything written to it, so `nixos-eval.nix` evaluates the module inside the real nixpkgs module set instead and reads `config.assertions` back as a value — which is how a check can demand that naming an undeclared user leaves the system buildable, warns once, names that user in the warning, and joins the stock `video` group rather than shadowing its gid. A build would only ever answer yes or no. Both module checks hand their result to jq, so each one opens by pinning the exact key names it reads: `jq` answers `0` for the length of a missing key
+
 ## Layout
 
 ```
 virtual-cam.sh       the camera
 virtual-mic.sh       the microphone
-nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix, module-test.nix
+nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix, module-test.nix, nixos-eval.nix
 tests/               run.sh, the four stubs and the golden command lines
 install.sh           for systems without Nix
 ```

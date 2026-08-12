@@ -5,8 +5,10 @@
 # fails a whole system with an error that never names this module.
 #
 # What gets forced is config.assertions, not system.build.toplevel: the assertions are the
-# thing under test, and forcing the toplevel drvPath instead walks the entire derivation
-# graph of a NixOS system — minutes per config, for no extra coverage
+# thing under test, and a check is realised rather than merely evaluated, so making the
+# toplevel the check would build a whole system closure. A build also answers in a single
+# bit, while the assertion and warning lists are values — enough to demand that a warning
+# name the user it is about
 {
   lib,
   nixpkgs,
