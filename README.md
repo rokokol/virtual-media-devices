@@ -12,8 +12,6 @@
 [![license](https://img.shields.io/badge/MIT-3DA639?style=flat)](LICENSE)
 [![build](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml)
 
-[Русский](README.ru.md)
-
 </div>
 
 This started because I wanted to Shazam a track I had as a file, and the web version of Shazam only listens to a microphone — there is no way to hand it a file. So the file became a microphone
