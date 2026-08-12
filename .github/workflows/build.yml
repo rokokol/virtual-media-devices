@@ -1,0 +1,35 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix build --no-write-lock-file .#virtual-cam .#virtual-mic
+      # tests, package-smoke, package-settings, module-wiring, scripts-lint. Nothing here
+      # loads a kernel module: the checks are either eval-level or run against stubs
+      - run: nix flake check --no-write-lock-file
+      # The scripts must stay usable without Nix: install.sh puts them behind symlinks,
+      # and the suite has to pass against the installed copies
+      - name: install.sh works
+        run: |
+          PREFIX=$PWD/out ./install.sh
+          test -L out/bin/virtual-cam
+          test -L out/bin/virtual-mic
+          VIRTUAL_CAM=$PWD/out/bin/virtual-cam VIRTUAL_MIC=$PWD/out/bin/virtual-mic ./tests/run.sh
+      - run: nix fmt -- --ci
+
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix run nixpkgs#shellcheck -- install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/stub/*
+      - run: nix run nixpkgs#shfmt -- -d -i 2 -ci install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/stub/*

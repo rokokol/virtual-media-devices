@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Serves a fixed --list-devices listing so device lookup by label is testable without a
+# kernel module. V4L2_CTL_LISTING replaces it; empty means "no devices at all"
+set -euo pipefail
+
+if [[ "${1:-}" == "--list-devices" ]]; then
+  printf '%s' "${V4L2_CTL_LISTING-$(
+    cat <<'EOF'
+Integrated Camera (usb-0000:00:14.0-8):
+	/dev/video0
+	/dev/video1
+
+Virtual Camera (platform:v4l2loopback-000):
+	/dev/video10
+
+EOF
+  )}"
+fi
+exit 0

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Reports whatever mime type the case asked for, so the suite can drive the image/video/
+# unsupported branches without carrying media files
+set -euo pipefail
+
+printf '%s\n' "${FILE_MIME:-video/mp4}"

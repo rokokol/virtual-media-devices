@@ -1,0 +1,13 @@
+-hide_banner
+-loglevel
+error
+-re
+-loop
+1
+-i
+input
+-vf
+fps=30,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=N/(30*TB)
+-f
+v4l2
+video10

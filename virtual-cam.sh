@@ -12,11 +12,19 @@ Usage:
 
 Options:
   -d, --device <path>   output device
-                        (default: looked up by the "Virtual Camera" label, otherwise /dev/video10)
+                        (default: looked up by label, otherwise $VIRTUAL_CAM_DEVICE)
   -f, --fps <n>         frame rate (default 30)
   -m, --mirror          mirror horizontally
                         (if the app doesn't mirror the preview itself)
   -h, --help            show this help
+
+Environment:
+  VIRTUAL_CAM_LABEL     card label to look the device up by (default "Virtual Camera")
+  VIRTUAL_CAM_DEVICE    device to fall back to when the label is not found
+                        (default /dev/video10)
+
+Both must match how v4l2loopback was loaded; the Nix module sets them from the
+same values it passes to modprobe
 
 The camera carries no sound — v4l2 is video only. For sound there's virtual-mic
 
@@ -33,12 +41,31 @@ flip=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -h | --help) usage; exit 0 ;;
-    -d | --device) device="${2:?--device requires a value}"; shift 2 ;;
-    -f | --fps) fps="${2:?--fps requires a value}"; shift 2 ;;
-    -m | --mirror) flip=1; shift ;;
-    --) shift; break ;;
-    -*) echo "virtual-cam: unknown option: $1" >&2; usage >&2; exit 1 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -d | --device)
+      device="${2:?--device requires a value}"
+      shift 2
+      ;;
+    -f | --fps)
+      fps="${2:?--fps requires a value}"
+      shift 2
+      ;;
+    -m | --mirror)
+      flip=1
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      echo "virtual-cam: unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
     *) break ;;
   esac
 done
@@ -54,11 +81,13 @@ if [[ ! -r "$file" ]]; then
   exit 1
 fi
 
-# Device: explicit flag → "Virtual Camera" label → /dev/video10
+# Device: explicit flag → card label → fixed fallback. The label goes into awk as a
+# variable, not into the program text, so a label with slashes can't break the match
 if [[ -z "$device" ]]; then
-  device="$(v4l2-ctl --list-devices 2>/dev/null \
-    | awk '/Virtual Camera/{getline; gsub(/^[[:space:]]+/,""); print; exit}')"
-  device="${device:-/dev/video10}"
+  device="$(v4l2-ctl --list-devices 2>/dev/null |
+    awk -v label="${VIRTUAL_CAM_LABEL:-Virtual Camera}" \
+      'index($0, label){getline; gsub(/^[[:space:]]+/,""); print; exit}')"
+  device="${device:-${VIRTUAL_CAM_DEVICE:-/dev/video10}}"
 fi
 if [[ ! -e "$device" ]]; then
   echo "virtual-cam: device $device does not exist — is the v4l2loopback module loaded?" >&2

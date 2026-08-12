@@ -28,24 +28,24 @@ name="Virtual-Mic"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  -h | --help)
-    usage
-    exit 0
-    ;;
-  -n | --name)
-    name="${2:?--name requires a value}"
-    shift 2
-    ;;
-  --)
-    shift
-    break
-    ;;
-  -*)
-    echo "virtual-mic: unknown option: $1" >&2
-    usage >&2
-    exit 1
-    ;;
-  *) break ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -n | --name)
+      name="${2:?--name requires a value}"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      echo "virtual-mic: unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *) break ;;
   esac
 done
 
@@ -82,7 +82,7 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT TERM HUP
 
-fifo="$(mktemp -u /tmp/virtual-mic.XXXXXX.fifo)"
+fifo="$(mktemp -u --tmpdir virtual-mic.XXXXXX.fifo)"
 mkfifo "$fifo"
 
 module_id="$(pactl load-module module-pipe-source \

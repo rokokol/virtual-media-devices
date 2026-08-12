@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Records the argv it was called with instead of encoding anything, so the suite can check
+# the command line the script builds — that command line is the whole product here
+set -euo pipefail
+
+printf '%s\n' "$@" >"${FFMPEG_ARGV:?FFMPEG_ARGV must point at a file}"
+
+# The mic path writes into a fifo and waits on this process; nothing reads that fifo in the
+# suite, so opening it would block forever. Recording the call is all that is wanted
+exit 0

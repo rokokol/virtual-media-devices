@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Stands in for the sound server: logs every call and hands back a module id, so both what
+# the source was created with and whether it was unloaded can be checked afterwards
+set -euo pipefail
+
+printf '%s\n' "$*" >>"${PACTL_LOG:?PACTL_LOG must point at a file}"
+
+[[ "${1:-}" == "load-module" ]] && echo 42
+exit 0

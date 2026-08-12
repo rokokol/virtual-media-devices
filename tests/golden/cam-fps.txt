@@ -1,0 +1,16 @@
+-hide_banner
+-loglevel
+error
+-stream_loop
+-1
+-re
+-i
+input
+-vf
+fps=24,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=N/(24*TB)
+-an
+-fflags
++genpts
+-f
+v4l2
+video10
