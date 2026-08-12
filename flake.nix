@@ -139,6 +139,16 @@
               ''
                 want() { jq -e "$1" "$dumpPath" >/dev/null || { echo "module wiring: $2"; exit 1; }; }
 
+                # The field names below are written a second time here, so a rename in
+                # module-test.nix would otherwise surface as a stray failure in whichever
+                # check read the key first — and jq answers 0 for the length of a missing one
+                want 'keys == [
+                  "groups", "hmOffPackages", "hmPackages", "kernelModules",
+                  "micKernelModules", "micModprobe", "micPackage", "modprobe",
+                  "offGroups", "offKernelModules", "offModprobe", "offPackages",
+                  "package", "tunedGroups", "tunedModprobe", "tunedPackage"
+                ]' "the dump no longer has the keys these checks read"
+
                 want '.package | test("virtual-cam")' "no command installed"
                 want '.kernelModules == ["v4l2loopback"]' "v4l2loopback is never loaded"
                 want '.modprobe | test("video_nr=10")' "the device number never reached modprobe"
@@ -192,6 +202,13 @@
               }
               ''
                 want() { jq -e "$1" "$dumpPath" >/dev/null || { echo "nixos eval: $2"; exit 1; }; }
+
+                want 'keys == [
+                  "declaredBroken", "declaredMembers", "declaredWarnings",
+                  "offKernelModules", "offMembers", "offWarnings",
+                  "stockVideoGid", "undeclaredBroken", "undeclaredMembers",
+                  "undeclaredModprobe", "undeclaredWarnings", "videoGid"
+                ]' "the dump no longer has the keys these checks read"
 
                 # Naming a user the host never declared used to fail the whole system on
                 # "Exactly one of isSystemUser and isNormalUser must be set" — an assertion
