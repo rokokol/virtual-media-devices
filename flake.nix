@@ -244,7 +244,7 @@
                 ];
               }
               ''
-                files="${camScript} ${micScript} ${testsDir}/run.sh ${testsDir}/stub/*"
+                files="${camScript} ${micScript} ${testsDir}/run.sh ${testsDir}/live.sh ${testsDir}/stub/*"
                 # shellcheck disable=SC2086
                 shellcheck $files
                 # shellcheck disable=SC2086

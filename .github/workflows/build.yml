@@ -31,5 +31,5 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v31
-      - run: nix run nixpkgs#shellcheck -- install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/stub/*
-      - run: nix run nixpkgs#shfmt -- -d -i 2 -ci install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/stub/*
+      - run: nix run nixpkgs#shellcheck -- install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/live.sh tests/stub/*
+      - run: nix run nixpkgs#shfmt -- -d -i 2 -ci install.sh virtual-cam.sh virtual-mic.sh tests/run.sh tests/live.sh tests/stub/*

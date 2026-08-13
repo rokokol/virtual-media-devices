@@ -151,6 +151,7 @@ The two settings reach the command as `VIRTUAL_CAM_LABEL` and `VIRTUAL_CAM_DEVIC
 
 ```sh
 tests/run.sh              # 20 checks, no kernel module and no sound server
+tests/live.sh             # the same two commands against the real server and the real device
 ```
 
 ffmpeg, pactl, v4l2-ctl and file are all stubbed, so what the suite checks is the command line each script builds — that command line *is* the product. The four camera cases are compared against golden files byte for byte: the filter chain ends in `setpts=N/(fps*TB)`, which is the one thing keeping the picture from stuttering at the loop point, and it should not change by accident. The device is an ordinary file in a scratch dir and `TMPDIR` points there too, so the FIFO the microphone creates cannot land in `/tmp`
@@ -158,6 +159,8 @@ ffmpeg, pactl, v4l2-ctl and file are all stubbed, so what the suite checks is th
 `nix flake check` runs that suite plus the packaged wrappers reaching their tools from a bare `PATH`, both settings arriving in the wrapper (and an unset one *not* being baked in), and both modules evaluated against option stubs — including that the microphone half never touches the kernel and that everything can be turned back off
 
 A stubbed option takes anything written to it, so `nixos-eval.nix` evaluates the module inside the real nixpkgs module set instead and reads `config.assertions` back as a value — which is how a check can demand that naming an undeclared user leaves the system buildable, warns once, names that user in the warning, and joins the stock `video` group rather than shadowing its gid. A build would only ever answer yes or no. Both module checks hand their result to jq, so each one opens by pinning the exact key names it reads: `jq` answers `0` for the length of a missing key
+
+Stubs have a floor, though, and this repository found it: `pactl` re-parses `source_properties` inside itself, so `--name "Fake Mic"` reached the server as `Fake` while a stub that only echoed its arguments saw nothing wrong. `tests/live.sh` is the answer — it runs both commands against the real PipeWire and the real `v4l2loopback`, and asks the server and the kernel what they ended up with. It needs a session, so it never runs in CI
 
 ## Layout
 
