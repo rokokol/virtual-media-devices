@@ -128,7 +128,7 @@ On a desktop you do not need to be in the `video` group: systemd's `uaccess` rul
 
 Both modules also take a `package`, so you can override or replace what gets installed
 
-| Option | Default | |
+| Option | Default | What it does |
 | --- | --- | --- |
 | `camera.enable` | `false` | NixOS: loads the kernel module and installs the command. HM: installs the command only |
 | `camera.label` | `"Virtual Camera"` | NixOS only. The name apps show, and what `virtual-cam` finds the device by |
