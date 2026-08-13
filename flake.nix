@@ -37,7 +37,15 @@
       });
 
       nixosModules.default = import ./nix/nixos-module.nix { inherit self; };
-      homeManagerModules.default = import ./nix/home-module.nix { inherit self; };
+      # homeModules is the name the flake schema knows; homeManagerModules is what most
+      # consumers still write, so both point at the same module
+      homeModules.default = import ./nix/home-module.nix { inherit self; };
+      homeManagerModules.default = self.homeModules.default;
+
+      # For a consumer who reaches for pkgs rather than this flake's packages directly
+      overlays.default = final: _prev: {
+        inherit (self.packages.${final.stdenv.hostPlatform.system}) virtual-cam virtual-mic;
+      };
 
       checks = forAllSystems (
         pkgs:
