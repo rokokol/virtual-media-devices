@@ -1,0 +1,18 @@
+# Changelog
+
+Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioned by [semver](https://semver.org/spec/v2.0.0.html)
+
+## [Unreleased]
+
+## [1.0.0] - 2026-08-13
+
+Split out of [rokokol/huix](https://github.com/rokokol/huix), where the two scripts and the modprobe line lived in the services directory
+
+### Added
+
+- `virtual-cam` and `virtual-mic`: a media file as a camera or a microphone, for as long as the command runs
+- the microphone as a pure `module-pipe-source`, so nothing reaches the headphones and no sink is created
+- `nixosModules.default` for the camera (it needs `v4l2loopback`) and `homeModules.default` for the microphone, which needs no system layer, plus `overlays.default`
+- `camera.label` and `camera.videoNr` declared once and delivered to both modprobe and the command
+- checks: the suite against four stubs with golden command lines, the packaged wrappers, both modules against option stubs and the NixOS one inside a real nixpkgs module set
+- `tests/live.sh`, which runs both commands against the real PipeWire and the real v4l2loopback
