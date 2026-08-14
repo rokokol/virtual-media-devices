@@ -4,6 +4,14 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Fixed
+
+- `virtual-cam` plays a symlinked file: `file` is now asked to follow the link instead of calling it `inode/symlink` and refusing it as an unsupported type
+
+### Changed
+
+- the `pactl` stub separates its logged arguments with a pipe and can be told to refuse a call, so the suite sees where one argument ends and can drive the path where the server says no
+
 ## [1.0.0] - 2026-08-13
 
 Split out of [rokokol/huix](https://github.com/rokokol/huix), where the two scripts and the modprobe line lived in the services directory

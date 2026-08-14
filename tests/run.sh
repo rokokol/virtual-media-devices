@@ -59,10 +59,12 @@ world() {
   touch "$dev" "$src"
   export FFMPEG_ARGV="$WORK/ffmpeg.argv"
   export PACTL_LOG="$WORK/pactl.log"
+  export FILE_ARGV="$WORK/file.argv"
   : >"$FFMPEG_ARGV"
   : >"$PACTL_LOG"
+  : >"$FILE_ARGV"
   export FILE_MIME=video/mp4
-  unset VIRTUAL_CAM_LABEL VIRTUAL_CAM_DEVICE V4L2_CTL_LISTING
+  unset VIRTUAL_CAM_LABEL VIRTUAL_CAM_DEVICE V4L2_CTL_LISTING PACTL_FAIL
 }
 
 # The listing v4l2-ctl serves, written in its real shape: a card line, then tab-indented nodes
@@ -182,6 +184,17 @@ else
   ok
 fi
 
+# file(1) does not follow a symlink unless it is told to, and answers inode/symlink — which
+# lands in the unsupported branch. A stub cannot show that, so what is checked here is the
+# flag; that the real file(1) needs it is checked in tests/live.sh
+world cam-asks-file-to-follow-symlinks
+"$CAM" -d "$dev" "$src" >/dev/null
+if grep -qx -- '-L' "$FILE_ARGV"; then
+  ok
+else
+  fail "file was called without -L: $(tr '\n' ' ' <"$FILE_ARGV")"
+fi
+
 world cam-missing-file
 if "$CAM" -d "$dev" "$WORK/absent" >/dev/null 2>&1; then
   fail "a missing file was accepted"
@@ -208,9 +221,9 @@ echo "microphone"
 
 world mic-creates-source
 "$MIC" "$src" >/dev/null
-load=$(grep '^load-module' "$PACTL_LOG" || true)
-if [[ "$load" == *"module-pipe-source"* && "$load" == *"source_name=virtual_mic"* &&
-  "$load" == *"format=s16le"* && "$load" == *"rate=48000"* && "$load" == *"channels=2"* ]]; then
+load=$(grep '^load-module|' "$PACTL_LOG" || true)
+if [[ "$load" == *"|module-pipe-source|"* && "$load" == *"|source_name=virtual_mic|"* &&
+  "$load" == *"|format=s16le|"* && "$load" == *"|rate=48000|"* && "$load" == *"|channels=2|"* ]]; then
   ok
 else
   fail "the source was not created as a s16le 48000/2 pipe source: $load"
@@ -225,13 +238,16 @@ else
 fi
 
 # A space in the name used to be silently cut at the space by the module-argument parser:
-# the description has to arrive quoted at both levels or "Fake Mic" shows up as "Fake"
+# the description has to arrive quoted at both levels or "Fake Mic" shows up as "Fake".
+# The pipes around the field are the assertion — inside one argument the two words are still
+# one argument, and that is the thing the quoting is for. Whether the server then keeps them
+# together is pactl's own parser, which no stub reproduces: tests/live.sh checks that half
 world mic-name-survives-a-space
 "$MIC" --name "Fake Mic" "$src" >/dev/null
-if grep -qF 'source_properties="device.description=\"Fake Mic\""' "$PACTL_LOG"; then
+if grep -qF '|source_properties="device.description=\"Fake Mic\""' "$PACTL_LOG"; then
   ok
 else
-  fail "a name with a space was not quoted for both parsers: $(grep '^load-module' "$PACTL_LOG")"
+  fail "a name with a space did not arrive as one argument: $(grep '^load-module|' "$PACTL_LOG")"
 fi
 
 world mic-name-rejects-a-quote
@@ -253,10 +269,23 @@ fi
 world mic-cleans-up
 "$MIC" "$src" >/dev/null
 fifo=$(tail -1 "$FFMPEG_ARGV")
-if grep -qF 'unload-module 42' "$PACTL_LOG" && [[ ! -e "$fifo" ]]; then
+if grep -qF 'unload-module|42' "$PACTL_LOG" && [[ ! -e "$fifo" ]]; then
   ok
 else
   fail "the source or the fifo outlived the command"
+fi
+
+# The server can refuse: no such module, or none of the caller's business. Real pactl says so
+# with an exit code, and everything after it in the script is written as if the source exists
+world mic-survives-a-refused-module
+if PACTL_FAIL=load-module "$MIC" "$src" >/dev/null 2>&1; then
+  fail "a refused load-module was reported as success"
+elif [[ -n "$(find "$WORK" -name 'virtual-mic.*.fifo' -print -quit)" ]]; then
+  fail "the fifo outlived a refused load-module"
+elif grep -q '^unload-module|' "$PACTL_LOG"; then
+  fail "a module that was never created was unloaded anyway"
+else
+  ok
 fi
 
 world mic-missing-file

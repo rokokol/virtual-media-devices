@@ -43,6 +43,10 @@ fail() {
 for tool in ffmpeg pactl v4l2-ctl; do
   command -v "$tool" >/dev/null || {
     printf 'live: %s is not on PATH — this suite needs the real tools\n' "$tool" >&2
+    # The usual absentee: pipewire-pulse speaks the protocol but ships no client, and the
+    # copy virtual-mic uses comes from its package — which this suite bypasses
+    [[ $tool == pactl ]] &&
+      printf 'live: on PipeWire, run: nix shell nixpkgs#pulseaudio -c tests/live.sh\n' >&2
     exit 1
   }
 done
@@ -135,6 +139,22 @@ else
     v4l2-ctl -d "$DEVICE" --get-fmt-video 2>&1 | sed 's/^/      /'
   fi
 
+  kill "${pids[-1]}" 2>/dev/null
+  wait "${pids[-1]}" 2>/dev/null
+  pids=()
+
+  # A media library is mostly symlinks, and the real file(1) calls one inode/symlink unless
+  # it is told to follow it — which put a perfectly good video in the unsupported branch.
+  # tests/run.sh can only check that -L is passed; whether it is needed is this half
+  ln -s "$WORK/clip.mp4" "$WORK/link.mp4"
+  "$CAM" "$WORK/link.mp4" >"$WORK/link.log" 2>&1 &
+  pids+=($!)
+  if until_true "grep -q 'video/' '$WORK/link.log'"; then
+    ok "a symlinked video is read through the link"
+  else
+    fail "a symlinked video was not recognised"
+    sed 's/^/      /' "$WORK/link.log"
+  fi
   kill "${pids[-1]}" 2>/dev/null
   wait "${pids[-1]}" 2>/dev/null
   pids=()

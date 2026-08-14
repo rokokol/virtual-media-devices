@@ -94,7 +94,9 @@ if [[ ! -e "$device" ]]; then
   exit 1
 fi
 
-mime="$(file --brief --mime-type "$file")"
+# -L: file(1) reports a symlink as inode/symlink and stops there, so a link to a video —
+# what a media library is usually made of — came back as an unsupported type
+mime="$(file --brief --mime-type -L "$file")"
 
 echo "virtual-cam: $file ($mime) → $device  @${fps}fps  (Ctrl+C — stop)"
 

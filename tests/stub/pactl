@@ -3,7 +3,21 @@
 # the source was created with and whether it was unloaded can be checked afterwards
 set -euo pipefail
 
-printf '%s\n' "$*" >>"${PACTL_LOG:?PACTL_LOG must point at a file}"
+# Arguments joined by a pipe, not by a space: a proplist arrives as one argument holding
+# spaces, and a log that joined on spaces could not tell it from two arguments — which is
+# precisely the mistake the description quoting exists to prevent
+(
+  IFS='|'
+  printf '%s\n' "$*"
+) >>"${PACTL_LOG:?PACTL_LOG must point at a file}"
+
+# The server refuses things: no module by that name, no permission to unload someone else's.
+# The wording is this stub's own and says so — what real pactl says is its business, and the
+# script only reads the exit code
+if [[ -n "${PACTL_FAIL:-}" && "${1:-}" == "${PACTL_FAIL}" ]]; then
+  printf 'stub pactl: refusing %s, because the case asked for it\n' "$1" >&2
+  exit 1
+fi
 
 [[ "${1:-}" == "load-module" ]] && echo 42
 exit 0
