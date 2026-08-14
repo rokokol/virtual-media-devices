@@ -4,6 +4,10 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Documentation
+
+- the README says why the microphone talks to the server through `pactl` and not through anything PipeWire-native, with the measurements behind the choice
+
 ## [1.0.1] - 2026-08-14
 
 ### Fixed

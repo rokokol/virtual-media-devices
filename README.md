@@ -108,6 +108,8 @@ This installs commands and nothing more. `camera.enable` here does **not** load 
 
 Both are plain bash. They need `ffmpeg`, `awk` and `coreutils`; the camera also needs `v4l2-ctl` (`v4l-utils`) and `file`, the microphone needs `pactl` (`pulseaudio-utils` — it drives PipeWire just as well)
 
+`pactl` rather than something PipeWire-native on purpose, measured on PipeWire 1.6.8: `libpipewire-module-pipe-tunnel` does make the same source, but a module loaded by `pw-cli` dies the moment `pw-cli` exits, so keeping the microphone alive would mean a second background process to supervise — where `pactl load-module` returns an id that outlives it and `unload-module` takes it back. The cost of staying on the Pulse client is a binary that runs for 5.9 MiB and a few milliseconds, against 8.9 MiB resident for as long as the mic is up. As for the 249 MiB closure: `pulseaudio` is usually already there anyway — plenty of desktop software still speaks the Pulse protocol for backwards compatibility, and pulls the client in. On the machine this was measured on, `qtwebengine` and `tauon` reference it, so removing the microphone would free nothing. Check your own with `nix-store --query --referrers` before counting it as a cost
+
 ```sh
 git clone https://github.com/rokokol/virtual-media-devices
 cd virtual-media-devices
