@@ -4,6 +4,8 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-08-14
+
 ### Fixed
 
 - `virtual-cam` plays a symlinked file: `file` is now asked to follow the link instead of calling it `inode/symlink` and refusing it as an unsupported type
