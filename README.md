@@ -116,6 +116,8 @@ cd virtual-media-devices
 sudo ./install.sh                 # or PREFIX=~/.local ./install.sh
 ```
 
+Package recipes can stage the same layout with `DESTDIR="$pkgdir" PREFIX=/usr ./install.sh`. Add `--component cam` or `--component mic` when the distribution packages the commands separately
+
 The microphone works from here. The camera needs the loopback device:
 
 ```sh

@@ -34,6 +34,13 @@ jobs:
           test -L out/bin/virtual-cam
           test -L out/bin/virtual-mic
           VIRTUAL_CAM=$PWD/out/bin/virtual-cam VIRTUAL_MIC=$PWD/out/bin/virtual-mic ./tests/run.sh
+          PREFIX=/usr ./install.sh --destdir "$PWD/stage-cam" --component cam
+          test -L stage-cam/usr/bin/virtual-cam
+          test ! -e stage-cam/usr/bin/virtual-mic
+          DESTDIR=$PWD/stage-mic PREFIX=/usr ./install.sh --component mic
+          test ! -e stage-mic/usr/bin/virtual-cam
+          test -L stage-mic/usr/bin/virtual-mic
+          ! DESTDIR=$PWD/bad PREFIX=usr ./install.sh >/dev/null 2>&1
       - run: nix fmt -- --ci
 
   shell:

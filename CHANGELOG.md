@@ -4,6 +4,10 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Changed
+
+- `install.sh` accepts `DESTDIR` independently of `PREFIX` and can install only the `cam` or `mic` component for split packages
+
 ### Documentation
 
 - the README says why the microphone talks to the server through `pactl` and not through anything PipeWire-native, with the measurements behind the choice
