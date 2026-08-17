@@ -4,6 +4,8 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-08-18
+
 ### Changed
 
 - `install.sh` accepts `DESTDIR` independently of `PREFIX` and can install only the `cam` or `mic` component for split packages
