@@ -3,9 +3,12 @@ name: update-lock
 # nixpkgs in flake.lock ages on its own and nothing else here moves it: dependabot watches
 # only the uses: pins. This bumps it weekly, runs the very same checks a push runs — build.yml
 # itself, not a copy of its commands — and lands the bump only if they pass
+#
+# 06:00 is the family's second wave: everything huix consumes lands its bump before huix takes
+# the tree at 07:00, so a red check here keeps the old revision instead of letting it arrive there
 on:
   schedule:
-    - cron: "0 5 * * 1"
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 # Two runs would push the same branch from different bases
