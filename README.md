@@ -36,7 +36,6 @@ Came over from my rice, **[rokokol/huix](https://github.com/rokokol/huix)**
 - [Picking the device in an app](#picking-the-device-in-an-app)
 - [Tests](#tests)
 - [Layout](#layout)
-- [License](#license)
 
 ## The two commands
 
@@ -175,7 +174,3 @@ nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-mo
 tests/               run.sh, the four stubs and the golden command lines
 install.sh           for systems without Nix
 ```
-
-## License
-
-MIT
