@@ -42,9 +42,13 @@ jobs:
 
       # The full installer contract lives in tests/installer.sh (run by flake check);
       # this is the smoke that the same script behaves on a real filesystem, and that
-      # the behaviour suite passes against the installed copies
+      # the behaviour suite passes against the installed copies. Under nix develop: the
+      # runner is not a target distribution, so the preflight's runtime deps (ffmpeg,
+      # v4l2-ctl, pactl) come from the flake's lock — the honest install-by-guidance
+      # path is the distro suite's job
       - name: install.sh works
         run: |
+          nix develop --no-write-lock-file --command bash -euo pipefail -c '
           PREFIX=$PWD/out ./install.sh
           test -L out/bin/virtual-cam
           test -L out/bin/virtual-mic
@@ -68,6 +72,7 @@ jobs:
             echo "a relative PREFIX was accepted" >&2
             exit 1
           fi
+          '
 
       - run: nix fmt -- --ci
 

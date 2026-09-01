@@ -312,8 +312,12 @@
 
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
+          # Also the pinned toolbox for CI: the runner is not a target distribution, so
+          # build.yml's install.sh step takes the preflight's runtime deps from here
           packages = with pkgs; [
             ffmpeg
+            file
+            gawk
             pulseaudio
             shellcheck
             shfmt
