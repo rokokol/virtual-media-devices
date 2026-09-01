@@ -10,12 +10,15 @@ Two modules, because the halves need different layers. The camera needs a kernel
 
 ```sh
 nix build .#virtual-cam .#virtual-mic
-nix flake check          # tests, the packaged wrappers, both modules, a real-nixpkgs eval, shell lint
+nix flake check          # tests, the packaged wrappers, both modules, a real-nixpkgs eval, scripts-lint, installer suite
 ./tests/run.sh           # stubbed tools in, the command lines the scripts build out
 ./tests/live.sh          # the real PipeWire and the real v4l2loopback
-PREFIX=$PWD/out ./install.sh
+./tests/installer.sh     # install.sh alone: manifest, sweep, selective uninstall, refusal path
+./tests/distro.sh fedora # the full cycle in a real container (docker/podman; deliberate, images are large)
 nix fmt -- --ci
 ```
+
+`VERSION` is the one source of version: both package files read it, `install.sh -v` prints it, CI asserts `CHANGELOG.md` has a matching heading. `install.sh` follows the huix-standard component-installer semantics: components `cam|mic|all` are additive, manifest lines carry their owning component (`meta` owns the shared VERSION copy and leaves with the last real component), `--uninstall --component C` removes one selectively. The runtime tools (ffmpeg, v4l2-ctl, pactl, awk, file) are install deps — the preflight refuses with per-distro guidance the distro tests execute verbatim; the v4l2loopback kernel module is the platform dep and only warns. New installer flags update both `completions/` files in the same commit, or `check-completions.sh` fails the flake check
 
 ## Layout
 
@@ -24,8 +27,10 @@ virtual-cam.sh       the camera
 virtual-mic.sh       the microphone
 nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix,
                      module-test.nix, nixos-eval.nix
-tests/               run.sh, live.sh, the four stubs and the golden command lines
-install.sh           for systems without Nix
+tests/               run.sh, live.sh, installer.sh, distro.sh, check-completions.sh,
+                     the four stubs and the golden command lines
+install.sh           for systems without Nix, VERSION its one source of version
+completions/         tab completion for install.sh, drift-checked against it
 ```
 
 ## Things that will bite

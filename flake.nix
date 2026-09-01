@@ -28,6 +28,18 @@
         name = "virtual-media-devices-tests";
         path = ./tests;
       };
+      installer = builtins.path {
+        name = "install.sh";
+        path = ./install.sh;
+      };
+      versionFile = builtins.path {
+        name = "VERSION";
+        path = ./VERSION;
+      };
+      completionsDir = builtins.path {
+        name = "virtual-media-devices-completions";
+        path = ./completions;
+      };
     in
     {
       packages = forAllSystems (pkgs: rec {
@@ -243,20 +255,56 @@
                 touch $out
               '';
 
+          # The one shell file list lives here and nowhere else: CI's shell job is a
+          # fast named status for this check, not a second copy of the commands
           scripts-lint =
             pkgs.runCommand "scripts-lint"
               {
                 nativeBuildInputs = [
                   pkgs.shellcheck
                   pkgs.shfmt
+                  pkgs.zsh
                 ];
               }
               ''
-                files="${camScript} ${micScript} ${testsDir}/run.sh ${testsDir}/live.sh ${testsDir}/stub/*"
+                files="${camScript} ${micScript} ${installer} ${testsDir}/run.sh ${testsDir}/live.sh ${testsDir}/installer.sh ${testsDir}/distro.sh ${testsDir}/check-completions.sh ${testsDir}/stub/* ${completionsDir}/install.sh.bash"
                 # shellcheck disable=SC2086
                 shellcheck $files
                 # shellcheck disable=SC2086
                 shfmt -d -i 2 -ci $files
+                # zsh is not shellcheck's language; a parse is what can be checked
+                zsh -n ${completionsDir}/install.sh.zsh
+
+                # install.sh and its completions must not drift apart
+                mkdir -p repo/tests
+                cp ${installer} repo/install.sh
+                cp -r ${completionsDir} repo/completions
+                cp ${testsDir}/check-completions.sh repo/tests/
+                bash repo/tests/check-completions.sh
+                touch $out
+              '';
+
+          # The fast installer suite, in the sandbox: the manifest contract, the
+          # per-component sweep, selective uninstall, staging, the refusal path with its
+          # per-distro guidance lines
+          installer-suite =
+            pkgs.runCommand "installer-suite"
+              {
+                # tests/installer.sh builds its stub PATHs out of these
+                nativeBuildInputs = [ pkgs.coreutils ];
+              }
+              ''
+                mkdir -p repo/tests
+                cp ${installer} repo/install.sh
+                cp ${camScript} repo/virtual-cam.sh
+                cp ${micScript} repo/virtual-mic.sh
+                cp ${versionFile} repo/VERSION
+                cp -r ${completionsDir} repo/completions
+                cp ${testsDir}/installer.sh ${testsDir}/check-completions.sh repo/tests/
+                chmod -R +w repo
+                chmod +x repo/install.sh repo/tests/*.sh
+                patchShebangs repo >/dev/null
+                HOME=$PWD bash repo/tests/installer.sh "$PWD/repo"
                 touch $out
               '';
         }

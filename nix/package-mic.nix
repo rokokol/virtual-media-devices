@@ -27,7 +27,13 @@ in
 
 stdenvNoCC.mkDerivation {
   pname = "virtual-mic";
-  version = "1.0.2";
+  # The one source of version: VERSION at the repo root, asserted against CHANGELOG by CI
+  version = lib.fileContents (
+    builtins.path {
+      name = "VERSION";
+      path = ../VERSION;
+    }
+  );
 
   dontUnpack = true;
   nativeBuildInputs = [ makeWrapper ];

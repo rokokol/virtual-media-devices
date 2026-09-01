@@ -4,6 +4,18 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Changed
+
+- `install.sh` reworked onto the [huix-standard](https://github.com/rokokol/huix-standard) grammar: `-h`/`-v` short flags, and a preflight that installs nothing — the tools the commands shell out to (ffmpeg, v4l2-ctl, pactl, awk, file) are collected per component and refused with exact per-distro install commands; the v4l2loopback kernel module stays a warning, it comes from the kernel and not a package. Components stay additive, each converging its own files on a re-run
+
+### Added
+
+- `VERSION` at the repo root as the one source of version: both packages read it, `install.sh -v|--version` prints it, CI asserts the changelog heading matches
+- `./install.sh --uninstall` removes an install by its manifest at `share/virtual-media-devices/install-manifest` — `--uninstall --component mic` takes one command out and keeps the other; installs made before the manifest existed fall back to the known layout for this one release
+- tab completion for the installer, `source completions/install.sh.{bash,zsh}`, drift-checked against `install.sh` by `tests/check-completions.sh`
+- `tests/installer.sh` — the installer's contract as a fast suite, also run by `nix flake check`: manifest, per-component sweep, selective uninstall, staging, the refusal path with its per-distro guidance
+- `tests/distro.sh` — the full preflight→guidance→install→uninstall cycle inside real `debian`, `ubuntu`, `arch` and `fedora` containers, where the printed guidance really installs ffmpeg and friends; the smoke never opens `/dev/video*` (no container has the kernel module — that half stays `tests/live.sh`'s). Four per-distro CI badges (push, weekly cron, never pull requests)
+
 ## [1.0.2] - 2026-08-18
 
 ### Changed

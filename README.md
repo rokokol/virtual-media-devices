@@ -11,6 +11,10 @@
 ![Nix](https://img.shields.io/badge/Nix-flake-7EBAE4?style=flat&logo=nixos&logoColor=white)
 [![license](https://img.shields.io/badge/MIT-3DA639?style=flat)](LICENSE)
 [![build](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml)
+[![debian](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-debian.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-debian.yml)
+[![ubuntu](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-ubuntu.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-ubuntu.yml)
+[![arch](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-arch.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-arch.yml)
+[![fedora](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-fedora.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-fedora.yml)
 
 </div>
 
@@ -115,6 +119,22 @@ cd virtual-media-devices
 sudo ./install.sh                 # or PREFIX=~/.local ./install.sh
 ```
 
+Nothing is ever installed behind your back: if a tool the commands shell out to is missing, the script names what and how to get it, exactly, for your distribution, and installs nothing until then — the kernel module is the one exception, a warning rather than a refusal, because it comes from your kernel and not a package. Every path written is recorded in `share/virtual-media-devices/install-manifest`, so the install is reversible, per command or whole:
+
+```sh
+sudo ./install.sh --uninstall --component mic   # take one command out
+sudo ./install.sh --uninstall                   # take everything out
+```
+
+Components are additive — installing one never touches the other — but re-running one converges it: a file a previous install of that component wrote and this run does not is swept away
+
+Tab completion for the installer's own flags is sourced from the checkout:
+
+```sh
+source completions/install.sh.bash   # bash
+source completions/install.sh.zsh   # zsh
+```
+
 Package recipes can stage the same layout with `DESTDIR="$pkgdir" PREFIX=/usr ./install.sh`. Add `--component cam` or `--component mic` when the distribution packages the commands separately
 
 The microphone works from here. The camera needs the loopback device:
@@ -155,6 +175,7 @@ The two settings reach the command as `VIRTUAL_CAM_LABEL` and `VIRTUAL_CAM_DEVIC
 ```sh
 tests/run.sh              # 20 checks, no kernel module and no sound server
 tests/live.sh             # the same two commands against the real server and the real device
+tests/installer.sh        # install.sh: manifest, per-component sweep, staging, the refusal path
 ```
 
 ffmpeg, pactl, v4l2-ctl and file are all stubbed, so what the suite checks is the command line each script builds — that command line *is* the product. The four camera cases are compared against golden files byte for byte: the filter chain ends in `setpts=N/(fps*TB)`, which is the one thing keeping the picture from stuttering at the loop point, and it should not change by accident. The device is an ordinary file in a scratch dir and `TMPDIR` points there too, so the FIFO the microphone creates cannot land in `/tmp`
@@ -165,12 +186,15 @@ A stubbed option takes anything written to it, so `nixos-eval.nix` evaluates the
 
 Stubs have a floor, though, and this repository found it: `pactl` re-parses `source_properties` inside itself, so `--name "Fake Mic"` reached the server as `Fake` while a stub that only echoed its arguments saw nothing wrong. `tests/live.sh` is the answer — it runs both commands against the real PipeWire and the real `v4l2loopback`, and asks the server and the kernel what they ended up with. It needs a session, so it never runs in CI
 
+`tests/distro.sh <distro>` (needs docker or podman) runs the install cycle inside a real `debian`, `ubuntu`, `arch` or `fedora` container: the preflight refuses over the missing tools, its printed guidance runs verbatim and really installs ffmpeg and friends, then install, selective uninstall, uninstall. No container has the kernel module, so the smoke never opens `/dev/video*` — that is `tests/live.sh`'s half. In CI that is the four distro badges — on push, weekly against `:latest`, never on pull requests
+
 ## Layout
 
 ```
 virtual-cam.sh       the camera
 virtual-mic.sh       the microphone
 nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix, module-test.nix, nixos-eval.nix
-tests/               run.sh, the four stubs and the golden command lines
-install.sh           for systems without Nix
+tests/               run.sh, live.sh, installer.sh, distro.sh, check-completions.sh, the stubs and goldens
+install.sh           for systems without Nix; VERSION is the one source of version
+completions/         tab completion for install.sh, sourced from the checkout
 ```
