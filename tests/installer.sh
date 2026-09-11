@@ -35,10 +35,16 @@ done
 [[ "$("$REPO/install.sh" -v)" == "virtual-media-devices $(cat "$REPO/VERSION")" ]] ||
   die "-v does not print 'virtual-media-devices \$(cat VERSION)'"
 
-say "bad arguments are refused"
-if run --prefix relative/path >/dev/null 2>&1; then die "a relative PREFIX was accepted"; fi
-if run --component speaker >/dev/null 2>&1; then die "an unknown component was accepted"; fi
-if run --no-such-flag >/dev/null 2>&1; then die "an unknown flag was accepted"; fi
+say "bad arguments are refused with exit 2, the usage-error code"
+rc=0
+run --prefix relative/path >/dev/null 2>&1 || rc=$?
+((rc == 2)) || die "a relative PREFIX exited $rc, not the usage-error code 2"
+rc=0
+run --component speaker >/dev/null 2>&1 || rc=$?
+((rc == 2)) || die "an unknown component exited $rc, not the usage-error code 2"
+rc=0
+run --no-such-flag >/dev/null 2>&1 || rc=$?
+((rc == 2)) || die "an unknown flag exited $rc, not the usage-error code 2"
 
 # The dev/sandbox machine may lack the runtime deps the preflight demands; a stub PATH
 # with everything present keeps the install tests about installing. The refusal test
@@ -125,7 +131,7 @@ echo "ID=debian" >"$tmp/os-release" # the flake-check sandbox has no /etc/os-rel
 rc=0
 out=$(OS_RELEASE="$tmp/os-release" PATH="$full" bash "$REPO/install.sh" \
   --prefix "$tmp/refused" 2>&1) || rc=$?
-((rc != 0)) || die "the preflight accepted a system without ffmpeg"
+((rc == 1)) || die "the preflight exited $rc, not the missing-dependency code 1"
 grep -q 'missing dependencies' <<<"$out" || die "the refusal did not say what is missing"
 grep -q ' - ffmpeg$' <<<"$out" || die "the refusal did not name ffmpeg"
 grep -q ' - pactl$' <<<"$out" || die "the refusal did not name pactl"
