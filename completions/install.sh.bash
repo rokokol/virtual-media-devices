@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Bash completion for ./install.sh of virtual-media-devices. Sourced from the checkout,
 # not installed:
 #   source completions/install.sh.bash
