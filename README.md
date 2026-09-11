@@ -194,7 +194,8 @@ Stubs have a floor, though, and this repository found it: `pactl` re-parses `sou
 virtual-cam.sh       the camera
 virtual-mic.sh       the microphone
 nix/                 package-cam.nix, package-mic.nix, nixos-module.nix, home-module.nix, module-test.nix, nixos-eval.nix
-tests/               run.sh, live.sh, installer.sh, distro.sh, check-completions.sh, the stubs and goldens
+check-sh.sh          vendored from bash-best-practices, holds install.sh's help and completions to its parser
+tests/               run.sh, live.sh, installer.sh, distro.sh, the stubs and goldens
 install.sh           for systems without Nix; VERSION is the one source of version
 completions/         tab completion for install.sh, sourced from the checkout
 ```

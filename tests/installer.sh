@@ -165,7 +165,8 @@ irun --component mic >/dev/null || die "mic-only install refused over a cam-only
 irun --uninstall >/dev/null
 
 say "install.sh and its completions agree"
-bash "$HERE/check-completions.sh" "$REPO" >/dev/null || die "completions drift"
+bash "$REPO/check-sh.sh" -c "$REPO/completions/install.sh.bash" "$REPO/completions/install.sh.zsh" \
+  "$REPO/install.sh" >/dev/null || die "completions drift"
 
 echo
 if ((fails)); then
