@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Installer for virtual-media-devices on systems without Nix. Projects what the two
-# packages install onto a plain prefix: the scripts under share/virtual-media-devices,
-# a relative symlink for each in bin, and an install-manifest that --uninstall consumes.
-# Components are additive: installing one never touches the other, and
-# --uninstall --component takes one back out on its own
 set -euo pipefail
 
 here="$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
@@ -20,9 +15,15 @@ usage() {
   cat <<EOF
 install virtual-media-devices $VERSION (virtual-cam and virtual-mic) into a prefix
 
+Installer for virtual-media-devices on systems without Nix. Projects what the two
+packages install onto a plain prefix: the scripts under share/virtual-media-devices,
+a relative symlink for each in bin, and an install-manifest that --uninstall consumes.
+Components are additive: installing one never touches the other, and
+--uninstall --component takes one back out on its own
+
 Re-running a component converges it: a file a previous install of that component wrote
 and this run does not is removed. The other component is never touched — install them
-one at a time, take them out one at a time.
+one at a time, take them out one at a time
 
 usage: ./install.sh [options]
   -h, --help        show this help and exit
@@ -35,14 +36,14 @@ usage: ./install.sh [options]
                     with --component C, only that component
 
 The camera also needs the v4l2loopback kernel module; the line to load it is printed at
-the end (env VIDEO_NR=$VIDEO_NR and LABEL="$LABEL" change what it says).
+the end (env VIDEO_NR=$VIDEO_NR and LABEL="$LABEL" change what it says)
 
 Runtime environment (read by the installed commands, not this script):
   VIRTUAL_CAM_LABEL   card label virtual-cam looks the device up by (default "Virtual Camera")
   VIRTUAL_CAM_DEVICE  device virtual-cam falls back to when the label is not found
 
 Exit 0 done, 1 when the install could not be made — a dependency missing, a manifest
-that cannot be written — and 2 on a usage error.
+that cannot be written — and 2 on a usage error
 EOF
 }
 

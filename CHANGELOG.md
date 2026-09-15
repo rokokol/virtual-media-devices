@@ -8,6 +8,7 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 - `install.sh` now exits 2, not 1, on a usage error — an unknown flag, a relative `--prefix`, or an invalid `--component` value — and `--help` ends with the `Exit` sentence naming every code it can produce; a missing dependency in the preflight still exits 1
 - the installer's completions are now drift-checked against `install.sh` by the vendored [bash-best-practices](https://github.com/rokokol/bash-best-practices-skill) `check-sh.sh -c`, replacing `tests/check-completions.sh`
+- `install.sh` moves its header's caller-facing paragraph into `--help`, leaving the header to editor-only notes. `tests/run.sh -h|--help|help` and `tests/installer.sh -h|--help|help` now document the suites, including that neither touches a kernel module, a sound server or the network
 
 ## [1.1.0] - 2026-09-01
 

@@ -1,11 +1,28 @@
 #!/usr/bin/env bash
 # Drives both commands against stubbed ffmpeg/pactl/v4l2-ctl/file and checks the command
 # lines they build — that is the whole product, everything else is argument parsing.
-#
-# Nothing here touches a kernel module or a sound server: the device is an ordinary file in
-# a scratch dir, and TMPDIR points there too, so the fifo the mic creates cannot land in /tmp
+# The device is an ordinary file in a scratch dir, and TMPDIR points there too, so the
+# fifo the mic creates cannot land in /tmp
 
 set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+tests/run.sh — the fast suite for virtual-media-devices: drives virtual-cam and
+virtual-mic against stubbed ffmpeg/pactl/v4l2-ctl/file and checks the command lines
+they build
+
+  tests/run.sh            run the suite
+  tests/run.sh --update   rewrite tests/golden from the current output
+
+Nothing here touches a kernel module, a sound server or the network
+Exit: 0 all passed, 1 a check failed
+EOF
+}
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" || "${1:-}" == "help" ]] && {
+  usage
+  exit 0
+}
 
 HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO=$(dirname "$HERE")
