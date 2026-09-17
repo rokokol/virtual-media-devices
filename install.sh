@@ -17,9 +17,7 @@ install virtual-media-devices $VERSION (virtual-cam and virtual-mic) into a pref
 
 Installer for virtual-media-devices on systems without Nix. Projects what the two
 packages install onto a plain prefix: the scripts under share/virtual-media-devices,
-a relative symlink for each in bin, and an install-manifest that --uninstall consumes.
-Components are additive: installing one never touches the other, and
---uninstall --component takes one back out on its own
+a relative symlink for each in bin, and an install-manifest that --uninstall consumes
 
 Re-running a component converges it: a file a previous install of that component wrote
 and this run does not is removed. The other component is never touched — install them
