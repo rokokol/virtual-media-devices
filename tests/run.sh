@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Drives both commands against stubbed ffmpeg/pactl/v4l2-ctl/file and checks the command
-# lines they build — that is the whole product, everything else is argument parsing.
+# The command lines the two scripts build are the whole product here; everything else is
+# argument parsing, which is why the goldens hold command lines and not output
+#
 # The device is an ordinary file in a scratch dir, and TMPDIR points there too, so the
 # fifo the mic creates cannot land in /tmp
 
