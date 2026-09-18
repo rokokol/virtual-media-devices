@@ -6,6 +6,8 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ### Changed
 
+- `virtual-cam.sh` reads the device listing into a value before matching the card label, instead of piping `v4l2-ctl --list-devices` into an awk that stops at its match. The pipe leaves `v4l2-ctl` writing into a closed reader, and under `pipefail` the SIGPIPE that follows is handed back as the status of a lookup that succeeded. A real listing is a few hundred bytes and leaves in one write, so nothing observable changes here; the shape is what goes, before a longer listing or a slower tool makes it matter
+
 - `install.sh` now exits 2, not 1, on a usage error — an unknown flag, a relative `--prefix`, or an invalid `--component` value — and `--help` ends with the `Exit` sentence naming every code it can produce; a missing dependency in the preflight still exits 1
 - the installer's completions are now drift-checked against `install.sh` by the vendored [bash-best-practices](https://github.com/rokokol/bash-best-practices-skill) `check-sh.sh -c`, replacing `tests/check-completions.sh`
 - `install.sh` moves its header's caller-facing paragraph into `--help`, leaving the header to editor-only notes. `tests/run.sh -h|--help|help` and `tests/installer.sh -h|--help|help` now document the suites, including that neither touches a kernel module, a sound server or the network

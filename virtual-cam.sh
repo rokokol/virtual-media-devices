@@ -83,10 +83,13 @@ fi
 
 # Device: explicit flag → card label → fixed fallback. The label goes into awk as a
 # variable, not into the program text, so a label with slashes can't break the match
+# The listing is read into a value first: awk stops at the first match, and a pipe would
+# leave v4l2-ctl writing into a closed reader, where SIGPIPE plus pipefail makes a
+# successful lookup look like a failed one
 if [[ -z "$device" ]]; then
-  device="$(v4l2-ctl --list-devices 2>/dev/null |
-    awk -v label="${VIRTUAL_CAM_LABEL:-Virtual Camera}" \
-      'index($0, label){getline; gsub(/^[[:space:]]+/,""); print; exit}')"
+  listing="$(v4l2-ctl --list-devices 2>/dev/null || true)"
+  device="$(awk -v label="${VIRTUAL_CAM_LABEL:-Virtual Camera}" \
+    'index($0, label){getline; gsub(/^[[:space:]]+/,""); print; exit}' <<<"$listing")"
   device="${device:-${VIRTUAL_CAM_DEVICE:-/dev/video10}}"
 fi
 if [[ ! -e "$device" ]]; then
