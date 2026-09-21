@@ -301,7 +301,11 @@
             pkgs.runCommand "installer-suite"
               {
                 # tests/installer.sh builds its stub PATHs out of these
-                nativeBuildInputs = [ pkgs.coreutils ];
+                nativeBuildInputs = [
+                  pkgs.coreutils
+                  pkgs.jq
+                  pkgs.shfmt
+                ];
               }
               ''
                 mkdir -p repo/tests
