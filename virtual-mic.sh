@@ -71,8 +71,9 @@ source_name="virtual_mic"
 rate=48000
 channels=2
 
-# Resources we create. Declared up front and empty so cleanup can remove them with
-# a "was it created" check — even if something fails midway through initialization
+# The resources this script creates. Declared up front and empty so cleanup can remove
+# them with a "was it created" check — even if something fails midway through
+# initialization
 fifo=""
 module_id=""
 ff_pid=""
