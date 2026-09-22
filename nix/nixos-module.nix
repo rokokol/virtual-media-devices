@@ -75,7 +75,7 @@ in
       boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
       boot.kernelModules = [ "v4l2loopback" ];
 
-      # exclusive_caps=1 is needed so the device is detected as a camera by browsers/messengers
+      # Without exclusive_caps=1 a browser or a messenger does not detect the device as a camera
       boot.extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=${toString cam.videoNr} card_label="${cam.label}" exclusive_caps=1
       '';
