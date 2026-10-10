@@ -9,6 +9,7 @@
 ![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=flat&logo=ffmpeg&logoColor=white)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat&logo=gnubash&logoColor=white)
 ![Nix](https://img.shields.io/badge/Nix-flake-7EBAE4?style=flat&logo=nixos&logoColor=white)
+[![FlakeHub](https://img.shields.io/endpoint?url=https://flakehub.com/f/rokokol/virtual-media-devices/badge)](https://flakehub.com/flake/rokokol/virtual-media-devices)
 [![license](https://img.shields.io/badge/MIT-3DA639?style=flat)](LICENSE)
 [![build](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/build.yml)
 [![debian](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-debian.yml/badge.svg)](https://github.com/rokokol/virtual-media-devices/actions/workflows/distro-debian.yml)
